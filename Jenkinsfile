@@ -27,6 +27,7 @@ pipeline {
                 retry(3) {
                     sh 'make unattended'
                     sh 'echo Test complete'
+                    sh 'echo now on local_development'
                 }
             }
         }
