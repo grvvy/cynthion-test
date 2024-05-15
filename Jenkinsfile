@@ -26,6 +26,7 @@ pipeline {
             steps {
                 retry(3) {
                     sh 'make unattended'
+                    sh 'echo Test complete'
                 }
             }
         }
