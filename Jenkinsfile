@@ -2,6 +2,7 @@ pipeline {
     agent {
         dockerfile {
             args '''
+                --tag greatscottgadgets/cynthion-test:latest
                 --group-add=46 --group-add=20 --device-cgroup-rule="c 189:* rmw"
                 --device-cgroup-rule="c 166:* rmw" --net=host
                 --volume /run/udev/control:/run/udev/control
