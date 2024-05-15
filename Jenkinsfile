@@ -11,7 +11,12 @@ node {
                 --device /dev/serial/by-id/usb-Black_Magic_Debug_Black_Magic_Probe_v1.9.1_7BB0778C-if00
             ''') {
         sh '''#!/bin/bash
-            id
-        '''
+                    git submodule init && git submodule update
+                    cp /tmp/calibration.dat calibration.dat
+                    python -m venv environment
+                    environment/bin/pip install --upgrade pip
+                    make
+                    make unattended
+            '''
     }
 }
