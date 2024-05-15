@@ -29,6 +29,7 @@ pipeline {
                     sh 'echo Test complete'
                     sh 'echo now on local_development'
                     sh 'echo another dummy commit'
+                    sh 'echo another dummy commit'
                 }
             }
         }
