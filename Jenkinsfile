@@ -1,8 +1,8 @@
 node {
     checkout scm
-    def cynTestImage = docker.build("cynthion-test:latest")
+    def cynTestImage = docker.build 'cynthion-test:latest'
 
-    cynTestImage.inside[('--group-add=46')] {
+    cynTestImage.inside {
         stage('Build') {
             steps {
                 sh '''#!/bin/bash
