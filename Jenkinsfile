@@ -20,12 +20,12 @@ node {
                     mkdir test_dir
             '''
     }
-    post {
-        always {
-            cleanWs(cleanWhenNotBuilt: false,
-                    deleteDirs: true,
-                    disableDeferredWipeout: true,
-                    notFailBuild: true)
-        }
+}
+post {
+    always {
+        cleanWs(cleanWhenNotBuilt: false,
+                deleteDirs: true,
+                disableDeferredWipeout: true,
+                notFailBuild: true)
     }
 }
