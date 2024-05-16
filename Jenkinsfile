@@ -17,6 +17,7 @@ node {
                     environment/bin/pip install --upgrade pip
                     make
                     make unattended
+                    mkdir test_dir
             '''
     }
 }
