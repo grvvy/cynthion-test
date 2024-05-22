@@ -6,17 +6,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', metavar='[filename]',
                         help='The filename to read from.')
-    parser.add_argument('-b', '--beginning', metavar='<beginning_datetime>', type=datetime.fromisoformat,
+    parser.add_argument('-b', '--begin', metavar='YYYY-MM-DD+HH:MM:SS', type=datetime.fromisoformat,
                         default=datetime.min,
-                        help='The date-time to begin parsing from')
-    parser.add_argument('-e', '--end', metavar='<end_datetime>', type=datetime.fromisoformat,
+                        help='The date and time to begin parsing from; character between date/time is flexible.')
+    parser.add_argument('-e', '--end', metavar='YYYY-MM-DD+HH:MM:SS', type=datetime.fromisoformat,
                         default=datetime.max,
-                        help='The date-time to stop parsing at')
+                        help='The date and time to end parsing at; character between date/time is flexible.')
     args = parser.parse_args()
-
-    if args.filename is None:
-        print('You must provide a filename to read from')
-        sys.exit(-1)
 
     log_file  = open(args.filename, 'r')
     log       = log_file.read()
@@ -55,31 +51,32 @@ def main():
             if mcu_check in test:
                 serial = test.split(mcu_check)[1].split(',')[0]
             else:
-                serial = None
+                serial = 'None'
 
             # keep track of every test result and associate a timestamp and
             # device serial number to each result
-            if test_time > args.beginning and test_time < args.end:
+            if test_time > args.begin and test_time < args.end:
                 if code is not None and code in results.keys():
                     results[code][0] += 1
                     if serial not in results[code][1]:
-                        results[code][1].append(serial)
+                        results[code][1].append((serial, test_time.strftime('%Y-%m-%d %H:%M:%S')))
                 elif code is not None:
-                    results[code] = [1, [serial]]
+                    results[code] = [1, [(serial, test_time)]]
     # sort by number of occurences of each fail code
     sorted_results = dict(sorted(results.items(), key=lambda item: item[1][0]))
 
     # print report
-    print(f"{'FAIL CODE' : <15}{'OCCURENCES' : ^15}{'DEVICE(S)'}")
+    print(f"{'FAIL CODE' : <15}{'OCCURENCES' : ^15}{'DEVICE(S)' : <30}{'TIMESTAMP(S)'}")
     for fail_code in sorted_results.keys():
         num_occurences = results[fail_code][0]
-        devices        = results[fail_code][1]
+        devices        = [d[0] for d in results[fail_code][1]]
+        timestamps     = [d[1] for d in results[fail_code][1]]
 
-        print('-------------------------------------------------------------')
-        print(f"{fail_code : <15}{num_occurences : ^15}{devices[0]}")
+        print('---------------------------------------------------------------------------------')
+        print(f"{fail_code : <15}{num_occurences : ^15}{devices[0] : <30}{timestamps[0]}")
         if len(devices) > 1:
-            for device in devices:
-                print(f"{device : >56}")
+            for d in range(1, len(devices)):
+                print(f"{'' : >30}{devices[d] : <30}{timestamps[d]}")
 
 
 if __name__ == '__main__':
