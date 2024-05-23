@@ -35,8 +35,6 @@ def main():
         else:
             # parse the desired time integer and add it to the appropriate timedelta
             trim_time = args.trim.upper()
-
-
             if 'H' in trim_time:
                 time_num = int(trim_time.replace('H', ''))
                 new_start = now - timedelta(hours=time_num)
@@ -92,24 +90,23 @@ def main():
                 if code is not None and code in results.keys():
                     results[code][0] += 1
                     if serial not in results[code][1]:
-                        results[code][1].append((serial, test_time.strftime('%Y-%m-%d %H:%M:%S')))
+                        results[code][1].append(serial)
                 elif code is not None:
-                    results[code] = [1, [(serial, test_time)]]
+                    results[code] = [1, [serial]]
     # sort by number of occurences of each fail code
     sorted_results = dict(sorted(results.items(), key=lambda item: item[1][0]))
 
     # print report
-    print(f"{'FAIL CODE' : <15}{'OCCURENCES' : ^15}{'DEVICE(S)' : <30}{'TIMESTAMP(S)'}")
+    print(f"{'FAIL CODE' : <15}{'OCCURENCES' : ^15}{'DEVICE(S)' : <30}")
     for fail_code in sorted_results.keys():
         num_occurences = results[fail_code][0]
-        devices        = [d[0] for d in results[fail_code][1]]
-        timestamps     = [d[1] for d in results[fail_code][1]]
+        devices        = results[fail_code][1]
 
-        print('---------------------------------------------------------------------------------')
-        print(f"{fail_code : <15}{num_occurences : ^15}{devices[0] : <30}{timestamps[0]}")
+        print('-------------------------------------------------------------')
+        print(f"{fail_code : <15}{num_occurences : ^15}{devices[0] : <30}")
         if len(devices) > 1:
             for d in range(1, len(devices)):
-                print(f"{'' : >30}{devices[d] : <30}{timestamps[d]}")
+                print(f"{'' : >30}{devices[d] : <30}")
 
 
 if __name__ == '__main__':
