@@ -1,6 +1,6 @@
 import sys
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 def main():
     parser = argparse.ArgumentParser()
@@ -21,6 +21,13 @@ def main():
     mcu_check = 'Checking for MCU serial number... '
     results   = {}
 
+    # timezone handling
+    tz_offset = -7.0 # Denver
+    tzinfo    = timezone(timedelta(hours=tz_offset))
+    now       = datetime.now(tzinfo)
+    start_time = args.begin.replace(tzinfo=tzinfo)
+    end_time = args.end.replace(tzinfo=tzinfo)
+
     if args.trim:
         if args.begin != datetime.min or args.end != datetime.max:
             print('Cannot use --trim alongside timeframe options: --begin or --end.')
@@ -28,19 +35,21 @@ def main():
         else:
             # parse the desired time integer and add it to the appropriate timedelta
             trim_time = args.trim.upper()
+
+
             if 'H' in trim_time:
                 time_num = int(trim_time.replace('H', ''))
-                new_start = datetime.now() - timedelta(hours=time_num)
+                new_start = now - timedelta(hours=time_num)
             elif 'M' in trim_time:
                 time_num = int(trim_time.replace('M', ''))
-                new_start = datetime.now() - timedelta(minutes=time_num)
+                new_start = now - timedelta(minutes=time_num)
             elif 'S' in trim_time:
                 time_num = int(trim_time.replace('S', ''))
-                new_start = datetime.now() - timedelta(seconds=time_num)
+                new_start = now - timedelta(seconds=time_num)
             else:
                 print("Invalid input string, use only integers with H/M/S appended.")
                 sys.exit(-1)
-            args.begin = new_start
+            start_time = new_start
 
     # split test runs by calls to cynthion-test.py
     test_runs = log.split(' cynthion-test.py')
@@ -51,6 +60,7 @@ def main():
             # date strings are 19 characters long and happen right before the cynthion-test.py split
             if test_runs[t-1].startswith('2024', -19):
                 test_time = datetime.strptime(test_runs[t-1].split('\n')[-1].strip(), '%Y-%m-%d %H:%M:%S')
+                test_time = test_time.replace(tzinfo=tzinfo)
             # handling beginning section of gsg8/9 logs with older version of test date output
             else:
                 test_time_text = test_runs[t-1].split(' MDT\ncyntest')[0].split('\n')[-1].split(' ')
@@ -62,7 +72,7 @@ def main():
                 if 'PM' in test_time_text:
                     hour += 12
                 # these test runs only happened in April, skipping month string->int conversion table
-                test_time = datetime(year, 4, day, hour, minute, second)
+                test_time = datetime(year, 4, day, hour, minute, second, tzinfo=tzinfo)
 
             # obtain result and associated device serial number of each test run
             if '\nFAIL' in test:
@@ -78,7 +88,7 @@ def main():
 
             # keep track of every test result and associate a timestamp and
             # device serial number to each result
-            if test_time > args.begin and test_time < args.end:
+            if test_time > start_time and test_time < end_time:
                 if code is not None and code in results.keys():
                     results[code][0] += 1
                     if serial not in results[code][1]:
