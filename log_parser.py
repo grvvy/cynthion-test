@@ -1,6 +1,6 @@
 import sys
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def main():
     parser = argparse.ArgumentParser()
@@ -12,12 +12,35 @@ def main():
     parser.add_argument('-e', '--end', metavar='YYYY-MM-DD+HH:MM:SS', type=datetime.fromisoformat,
                         default=datetime.max,
                         help='The date and time to end parsing at; character between date/time is flexible.')
+    parser.add_argument('-t', '--trim', metavar='<num>H/M/S', type=str,
+                        help="The amount of time (hours/mins/seconds) to inspect from the end of the log file.")
     args = parser.parse_args()
 
     log_file  = open(args.filename, 'r')
     log       = log_file.read()
     mcu_check = 'Checking for MCU serial number... '
     results   = {}
+
+    if args.trim:
+        if args.begin != datetime.min or args.end != datetime.max:
+            print('Cannot use --trim alongside timeframe options: --begin or --end.')
+            sys.exit(-1)
+        else:
+            # parse the desired time integer and add it to the appropriate timedelta
+            trim_time = args.trim.upper()
+            if 'H' in trim_time:
+                time_num = int(trim_time.replace('H', ''))
+                new_start = datetime.now() - timedelta(hours=time_num)
+            elif 'M' in trim_time:
+                time_num = int(trim_time.replace('M', ''))
+                new_start = datetime.now() - timedelta(minutes=time_num)
+            elif 'S' in trim_time:
+                time_num = int(trim_time.replace('S', ''))
+                new_start = datetime.now() - timedelta(seconds=time_num)
+            else:
+                print("Invalid input string, use only integers with H/M/S appended.")
+                sys.exit(-1)
+            args.begin = new_start
 
     # split test runs by calls to cynthion-test.py
     test_runs = log.split(' cynthion-test.py')
