@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     gdb-multiarch \
     git \
     make \
+    libusb-1.0-0-dev \
     python-is-python3 \
     python3-pip \
     python3-venv \
