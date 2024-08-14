@@ -15,6 +15,7 @@ RUN ln -s /startup/hubs.py /usr/local/bin/hubs
 # Override interactive installations and install dependencies
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+    curl \
     dfu-util \
     fxload \
     gdb-multiarch \
