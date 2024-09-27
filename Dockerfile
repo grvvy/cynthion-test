@@ -20,8 +20,9 @@ RUN apt-get update && apt-get install -y \
     fxload \
     gdb-multiarch \
     git \
-    make \
+    jq \
     libusb-1.0-0-dev \
+    make \
     python-is-python3 \
     python3-pip \
     python3-venv \
