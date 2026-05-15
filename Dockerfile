@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     dfu-util \
     fxload \
+    gcc-arm-none-eabi \
     gdb-multiarch \
     git \
     jq \
